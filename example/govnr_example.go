@@ -1,12 +1,13 @@
-package govnr
+package example
 
 import (
 	"context"
 	"fmt"
+	"github.com/orbs-network/govnr"
 	"time"
 )
 
-type stdoutErrorer struct {}
+type stdoutErrorer struct{}
 
 func (s *stdoutErrorer) Error(err error) {
 	fmt.Println(err.Error())
@@ -17,7 +18,7 @@ func Example() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	data := make(chan int)
-	handle := Forever(ctx, "an example process", errorHandler, func() {
+	handle := govnr.Forever(ctx, "an example process", errorHandler, func() {
 		for {
 			select {
 			case i := <-data:
@@ -28,7 +29,7 @@ func Example() {
 		}
 	})
 
-	supervisor := &TreeSupervisor{}
+	supervisor := &govnr.TreeSupervisor{}
 	supervisor.Supervise(handle)
 
 	data <- 3
@@ -36,7 +37,7 @@ func Example() {
 	data <- 1
 	cancel()
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	supervisor.WaitUntilShutdown(shutdownCtx)
 
 	// Output:
@@ -44,4 +45,3 @@ func Example() {
 	// goroutine got data: 2
 	// goroutine got data: 1
 }
-

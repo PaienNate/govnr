@@ -12,7 +12,7 @@ type Errorer interface {
 
 type ContextEndedChan <-chan struct{}
 
-// Runs f() in a new goroutine; if it panics, logs the error and stack trace to the specified Errorer
+// Once Runs f() in a new goroutine; if it panics, logs the error and stack trace to the specified Errorer
 func Once(errorHandler Errorer, f func()) {
 	go func() {
 		tryOnce(errorHandler, f)

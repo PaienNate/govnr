@@ -3,12 +3,18 @@ package govnr
 import (
 	"context"
 	"sync"
+	"time"
 )
 
-type ShutdownWaiter interface {
-	// Implementors of WaitUntilShutdown are expected to block until any goroutine they spawned have finished, or until the provided context has closed
-	// Any persistent goroutine started with Forever is a ShutdownWaiter
-	WaitUntilShutdown(shutdownContext context.Context)
+// GracefulShutdowner copied from orbs-network-go
+type GracefulShutdowner interface {
+	GracefulShutdown(shutdownContext context.Context)
+}
+
+func ShutdownGracefully(s GracefulShutdowner, timeout time.Duration) {
+	shutdownContext, cancel := context.WithTimeout(context.Background(), timeout) // give system some time to gracefully finish
+	defer cancel()
+	s.GracefulShutdown(shutdownContext)
 }
 
 type Supervisor interface {
@@ -19,7 +25,7 @@ type supervisedMarker interface {
 	MarkSupervised()
 }
 
-// Useful for creating supervision trees; that is, nested object graphs that spawn long-running goroutines where the top level
+// TreeSupervisor Useful for creating supervision trees; that is, nested object graphs that spawn long-running goroutines where the top level
 // object needs to block until all goroutines in the systems have shut down. As such, TreeSupervisor is both a Supervisor and a ShutdownWaiter.
 // When WaitUntilShutdown is called, it will in turn call WaitUntilShutdown on all of its Supervised ShutdownWaiters.
 //

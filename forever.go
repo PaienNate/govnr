@@ -41,7 +41,7 @@ func (h *ForeverHandle) terminated() {
 	close(h.closed)
 }
 
-// Runs f() in a new goroutine; if it panics, emits the error to the provided Errorer.
+// Forever Runs f() in a new goroutine; if it panics, emits the error to the provided Errorer.
 // If the provided Context isn't closed, re-runs f().
 // Returns a ForeverHandle to allow a Supervisor to wait for graceful shutdown.
 // When f() exists normally, if the ForeverHandle hasn't been passed to a Supervisor, an error will be emitted to the provided Errorer.
